@@ -1,36 +1,101 @@
-# Project 1 – Serverless Event Ingestion Backend
+# Project 1 – Serverless HTTP Event Ingestion (AWS)
+
+## Goal
+Receive → validate → enrich → store HTTP events in a cost-efficient, serverless way.
+
+This project demonstrates a realistic cloud backend pattern commonly used for:
+- Third-party webhooks
+- IoT / telemetry ingestion
+- Application analytics events
+- Audit and logging pipelines
+
+The focus is on **clean architecture, cost awareness, and extensibility**, not on building a full product.
+
+---
+
+## Architecture Overview
+
+![Architecture](docs/architecture/architecture-event-ingestion.png)
+
+[View SVG version](docs/architecture/architecture-event-ingestion.svg)
+
+### Flow
+1. External system sends an HTTP `POST /events` request
+2. Amazon API Gateway (HTTP API) receives the request
+3. AWS Lambda:
+   - validates the payload
+   - enriches it with metadata (timestamp, event_id)
+4. Amazon DynamoDB stores the raw event and metadata
+5. Amazon CloudWatch collects logs, metrics, and errors
+
+Later processing (analytics, replay, pipelines) is intentionally **out of scope** for this project.
+
+---
 
 ## Problem Statement
-Build a simple, cost-efficient, and scalable backend that receives HTTP events, performs basic validation, and stores them for later processing, without running a continuously active server.
+Build a simple, scalable backend that can receive HTTP events, perform lightweight validation, and persist them for later processing **without running any continuously active servers**.
 
-This represents common real-world needs such as webhooks, IoT event ingestion, application analytics events, and audit/telemetry logging.
+This mirrors real-world ingestion systems where:
+- traffic is bursty
+- cost must scale with usage
+- infrastructure should stay minimal
+
+---
 
 ## First Principles Breakdown
 
-### What is the simplest thing that must exist?
-At the most basic level, we need:
+### What is the simplest system that solves the problem?
 
-1. **An entry point (endpoint)**  
-   A public HTTP endpoint that external systems can send events to.
+1. **Public entry point**  
+   A single HTTP endpoint that external systems can call.
 
-2. **A compute step to handle the event**  
-   Something that runs only when an event arrives, validates the payload, and prepares it for storage.
+2. **Event-driven compute**  
+   Logic that runs only when an event arrives.
 
-3. **A durable place to store the event**  
-   The event must be saved reliably so it can be processed later.
+3. **Durable storage**  
+   Events must be stored reliably for later consumption.
 
 4. **Observability**  
-   Logs are required to verify requests, debug failures, and prove that the system works.
+   Logs and metrics are required to verify correct behavior and debug issues.
 
-### What is intentionally excluded (for this project)?
-To keep the scope focused and realistic for a first portfolio project, we intentionally exclude:
+---
 
-- User accounts and authentication
+## Design Decisions & Trade-offs
+
+### API Gateway HTTP API (not REST API)
+- Lower cost
+- Lower latency
+- Sufficient feature set for ingestion-only use case
+
+### AWS Lambda for validation
+- No idle compute cost
+- Scales automatically with traffic
+- Keeps API Gateway configuration simple
+
+### DynamoDB for event storage
+- Optimized for high write throughput
+- No schema migrations
+- Easy to attach future consumers (streams, analytics, replay)
+
+### What is intentionally excluded
+- Authentication and user management
 - Frontend/UI
-- Complex validation rules and schemas
+- Complex schemas and validation rules
 - Real-time processing pipelines
-- Data analytics dashboards
-- Production-grade SLAs and compliance
-- Always-on public demo endpoints
+- Analytics dashboards
+- Production SLAs and compliance requirements
 
-The goal is to demonstrate a clean foundation that can be extended in later projects.
+This project is designed as a **foundation**, not a finished product.
+
+---
+
+## Infrastructure as Code
+All infrastructure is defined using **Terraform**.
+
+Key principles:
+- Reproducible deployments
+- Clear separation of concerns
+- Least-privilege IAM permissions
+- Explicit tagging for cost visibility
+
+Terraform implementation is added incrementally as the infrastructure is built.
