@@ -11,9 +11,19 @@ override.tf.json
 *_override.tf
 *_override.tf.json
 
+# Terraform CLI local state / user config
+.terraformrc
+terraform.rc
+
+# Terraform plan files
+*.tfplan
+
 # Terraform lock file (KEEP THIS COMMITTED)
 # terraform.lock.hcl
 
 # OS / Editor
 .DS_Store
 .vscode/
+
+# Logs
+*.log
