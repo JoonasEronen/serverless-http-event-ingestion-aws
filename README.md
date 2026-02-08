@@ -33,7 +33,7 @@ Later processing (analytics, replay, pipelines) is intentionally **out of scope*
 ---
 
 ## Problem Statement
-Build a simple, scalable backend that can receive HTTP events, perform lightweight validation, and persist them for later processing **without running any continuously active servers**.
+Build a simple, scalable backend that can receive HTTP events, perform lightweight validation, and persist them for later processing **without managing any continuously active servers**.
 
 This mirrors real-world ingestion systems where:
 - traffic is bursty

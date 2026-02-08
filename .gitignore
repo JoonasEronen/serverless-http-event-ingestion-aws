@@ -1,4 +1,6 @@
+# =====================
 # Terraform
+# =====================
 **/.terraform/*
 *.tfstate
 *.tfstate.*
@@ -21,9 +23,21 @@ terraform.rc
 # Terraform lock file (KEEP THIS COMMITTED)
 # terraform.lock.hcl
 
+
+# =====================
+# Build artifacts
+# =====================
+build/
+
+
+# =====================
 # OS / Editor
+# =====================
 .DS_Store
 .vscode/
 
+
+# =====================
 # Logs
+# =====================
 *.log
