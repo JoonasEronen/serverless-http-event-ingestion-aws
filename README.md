@@ -1,5 +1,13 @@
 # Project 1 – Serverless HTTP Event Ingestion (AWS)
 
+> **Project status**  
+> This project is fully functional and deployed to AWS.
+> It represents a realistic, working serverless ingestion backend.
+>
+> I am continuing to iterate on documentation clarity and
+> production-level considerations (e.g. authentication, rate limiting,
+> and monitoring) to reflect a real-world cloud engineering workflow.
+
 ## Goal
 Receive → validate → enrich → store HTTP events in a cost-efficient, serverless way.
 
@@ -90,7 +98,8 @@ This project is designed as a **foundation**, not a finished product.
 ---
 
 ## Infrastructure as Code
-All infrastructure is defined using **Terraform**.
+
+All infrastructure for this project is defined and deployed using **Terraform**.
 
 Key principles:
 - Reproducible deployments
@@ -98,4 +107,42 @@ Key principles:
 - Least-privilege IAM permissions
 - Explicit tagging for cost visibility
 
-Terraform implementation is added incrementally as the infrastructure is built.
+The current Terraform configuration provisions the full system:
+- API Gateway (HTTP API)
+- Lambda function and execution role
+- DynamoDB table
+- Required IAM policies and permissions
+
+The infrastructure reflects a completed, working baseline that can be
+extended further as requirements evolve.
+
+All resources are deployed to an AWS account using `terraform apply`,
+and the system is actively handling test traffic via the public HTTP endpoint.
+
+---
+
+## Current State
+
+- Fully deployed to AWS using Terraform
+- Public HTTP API receiving events
+- Lambda-based validation and enrichment
+- Events persisted in DynamoDB
+- Logs and metrics available in CloudWatch
+
+The system is intentionally minimal to emphasize correctness,
+cost-awareness, and clear service boundaries.
+
+---
+
+## Next Iteration (Planned Improvements)
+
+The following items are intentionally excluded from the current version,
+but represent realistic next steps toward a production-ready system:
+
+- Authentication and authorization for the ingestion endpoint
+- Request rate limiting and abuse protection
+- Stronger schema validation and error classification
+- CloudWatch alarms for failures and throttling
+- Environment separation (dev / prod)
+
+These are excluded to keep the current version focused and easy to reason about.
