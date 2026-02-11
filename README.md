@@ -1,12 +1,12 @@
-# Project 1 – Serverless HTTP Event Ingestion (AWS)
+# Serverless HTTP Event Ingestion (AWS)
 
 > **Project status**  
 > This project is fully functional and deployed to AWS.
 > It represents a realistic, working serverless ingestion backend.
 >
-> I am continuing to iterate on documentation clarity and
-> production-level considerations (e.g. authentication, rate limiting,
-> and monitoring) to reflect a real-world cloud engineering workflow.
+> Documentation reflects a realistic cloud engineering workflow and
+> explicitly highlights production-level considerations that are
+> intentionally out of scope for this version.
 
 ## Goal
 Receive → validate → enrich → store HTTP events in a cost-efficient, serverless way.
@@ -27,8 +27,10 @@ The focus is on **clean architecture, cost awareness, and extensibility**, not o
 
 [View SVG version](docs/architecture/architecture-event-ingestion.svg)
 
+
 ### Flow
 1. External system sends an HTTP `POST /events` request
+   *(In this project, the external webhook source is simulated using Postman for testing purposes.)*
 2. Amazon API Gateway (HTTP API) receives the request
 3. AWS Lambda:
    - validates the payload
@@ -68,6 +70,39 @@ This mirrors real-world ingestion systems where:
 
 ---
 
+## Business Context
+
+Many systems need a reliable way to receive events from external sources
+(webhooks, devices, services) without tightly coupling those sources to internal systems.
+
+Common challenges include:
+- Bursty and unpredictable traffic
+- Cost inefficiency of always-on servers
+- Tight coupling between producers and consumers
+- Difficulty replaying or reprocessing events
+
+This project models a simple, decoupled ingestion layer that solves these problems
+while keeping operational and cost complexity low.
+
+---
+
+## Cost and Scaling Model
+
+This system is designed to scale with usage and remain inexpensive at low traffic volumes.
+
+- No continuously running servers
+- Compute is billed only when events are processed
+- Storage cost scales linearly with the number of events
+
+Typical usage scenarios:
+- Low baseline traffic with occasional bursts
+- Event-driven integrations rather than constant polling
+
+This makes the solution suitable for early-stage systems,
+internal tooling, and ingestion pipelines where cost predictability matters.
+
+---
+
 ## Design Decisions & Trade-offs
 
 ### API Gateway HTTP API (not REST API)
@@ -85,7 +120,10 @@ This mirrors real-world ingestion systems where:
 - No schema migrations
 - Easy to attach future consumers (streams, analytics, replay)
 
-### What is intentionally excluded
+## Intentional Scope Limitations
+The following features are intentionally excluded to keep the system focused
+on ingestion reliability and cost-efficiency rather than full product concerns:
+
 - Authentication and user management
 - Frontend/UI
 - Complex schemas and validation rules
@@ -134,15 +172,53 @@ cost-awareness, and clear service boundaries.
 
 ---
 
-## Next Iteration (Planned Improvements)
+## Operational Considerations
+
+Basic operational visibility is provided via CloudWatch logs and metrics.
+
+- Request flow can be traced using request_id and event_id
+- Lambda logs provide validation and processing visibility
+- DynamoDB acts as a durable source of truth for received events
+
+In a production environment, this system would typically be extended with:
+- Alarms for error rates and throttling
+- Access controls and rate limiting
+- Structured error classification
+
+These are intentionally excluded from the current version to keep the system minimal.
+
+---
+
+## Next Iteration (Production Considerations)
 
 The following items are intentionally excluded from the current version,
-but represent realistic next steps toward a production-ready system:
+but represent typical production concerns for an ingestion system:
 
-- Authentication and authorization for the ingestion endpoint
+- Authentication and authorization
 - Request rate limiting and abuse protection
-- Stronger schema validation and error classification
-- CloudWatch alarms for failures and throttling
+- Enhanced schema validation and error classification
+- Alerting for error rates and throttling
 - Environment separation (dev / prod)
 
-These are excluded to keep the current version focused and easy to reason about.
+They are omitted here to keep the project focused on ingestion reliability,
+cost efficiency, and architectural clarity rather than full product hardening.
+
+---
+
+## CI/CD and Infrastructure Maturity (Planned)
+
+The current version of this project is deployed using Terraform from a local environment.
+CI/CD is not yet implemented in this version.
+
+The next iteration will introduce a fully automated CI/CD workflow with:
+- GitHub Actions for automated validation and deployment
+- Terraform remote state (S3 backend)
+- State locking (DynamoDB)
+- GitHub → AWS authentication using OIDC (no long-lived credentials)
+- Branch protection and PR-based infrastructure validation
+
+The goal of this iteration is to evolve the project from a manually deployed MVP
+into a production-style, automation-driven infrastructure workflow.
+
+This reflects real-world engineering practices where infrastructure changes
+are validated, reviewed, and deployed automatically.
