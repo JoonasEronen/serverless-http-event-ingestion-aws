@@ -4,6 +4,7 @@
 **/.terraform/*
 *.tfstate
 *.tfstate.*
+*.tfplan
 crash.log
 crash.*.log
 *.tfvars
@@ -17,18 +18,10 @@ override.tf.json
 .terraformrc
 terraform.rc
 
-# Terraform plan files
-*.tfplan
-
-# Terraform lock file (KEEP THIS COMMITTED)
-# terraform.lock.hcl
-
-
 # =====================
 # Build artifacts
 # =====================
 build/
-
 
 # =====================
 # OS / Editor
@@ -36,9 +29,7 @@ build/
 .DS_Store
 .vscode/
 
-
 # =====================
 # Logs
 # =====================
 *.log
-*.tfplan
