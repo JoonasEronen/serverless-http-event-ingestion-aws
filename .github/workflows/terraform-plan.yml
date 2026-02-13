@@ -29,7 +29,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: "1.5.0"
+          terraform_version: "1.14.5"
 
       - name: Configure AWS (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
@@ -39,6 +39,13 @@ jobs:
 
       - name: Terraform fmt
         run: terraform fmt -check -recursive
+
+      - name: Build Lambda package (lambda.zip)
+        working-directory: .
+        run: |
+          mkdir -p build
+          cd app
+          zip -r ../build/lambda.zip .
 
       - name: Terraform init
         run: terraform init -input=false
