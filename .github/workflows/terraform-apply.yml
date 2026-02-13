@@ -40,6 +40,13 @@ jobs:
       - name: Terraform fmt
         run: terraform fmt -check -recursive
 
+      - name: Build Lambda package (lambda.zip)
+        working-directory: .
+        run: |
+          mkdir -p build
+          cd app
+          zip -r ../build/lambda.zip .
+
       - name: Terraform init
         run: terraform init -input=false
 
