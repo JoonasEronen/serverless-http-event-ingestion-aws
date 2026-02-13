@@ -9,7 +9,7 @@ resource "aws_lambda_function" "ingestion" {
   source_code_hash = filebase64sha256("${path.module}/../build/lambda.zip")
 
   timeout     = 10
-  memory_size = 128
+  memory_size = 256
 
   environment {
     variables = {
