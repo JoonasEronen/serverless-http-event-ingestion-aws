@@ -21,7 +21,7 @@ The focus is on **clean architecture, cost awareness, automation, and extensibil
 
 ---
 
-# Architecture Overview
+## Architecture Overview
 
 ![Architecture](docs/architecture/architecture-event-ingestion.png)
 
@@ -42,7 +42,7 @@ Later processing (analytics, replay, pipelines) is intentionally **out of scope*
 
 ---
 
-# Problem Statement
+## Problem Statement
 
 Build a simple, scalable backend that can receive HTTP events, perform lightweight validation, and persist them for later processing **without managing continuously running servers**.
 
@@ -55,7 +55,7 @@ This mirrors real-world ingestion systems where:
 
 ---
 
-# First Principles Breakdown
+## First Principles Breakdown
 
 ### What is the simplest system that solves the problem?
 
@@ -73,7 +73,7 @@ This mirrors real-world ingestion systems where:
 
 ---
 
-# Business Context
+## Business Context
 
 Many systems need a reliable way to receive events from external sources
 (webhooks, devices, services) without tightly coupling those producers to internal systems.
@@ -90,7 +90,7 @@ while keeping operational complexity low.
 
 ---
 
-# Cost and Scaling Model
+## Cost and Scaling Model
 
 - No continuously running servers
 - Compute billed only when events are processed
@@ -105,7 +105,7 @@ Suitable for:
 
 ---
 
-# Design Decisions & Trade-offs
+## Design Decisions & Trade-offs
 
 ### API Gateway HTTP API (not REST API)
 - Lower cost
@@ -124,7 +124,7 @@ Suitable for:
 
 ---
 
-# Infrastructure as Code
+## Infrastructure as Code
 
 All infrastructure is defined using **Terraform**.
 
@@ -145,13 +145,13 @@ Principles:
 
 ---
 
-# CI/CD & Infrastructure Automation
+## CI/CD & Infrastructure Automation
 
 This project is deployed using GitHub Actions with automated Terraform execution.
 
-## Workflow Overview
+### Workflow Overview
 
-### Pull Request
+#### Pull Request
 
 Opening a PR triggers:
 
@@ -165,7 +165,7 @@ Infrastructure changes are validated before merge.
 
 ---
 
-### Merge to main
+#### Merge to main
 
 Merging to `main` triggers:
 
@@ -188,13 +188,13 @@ This mirrors real-world infrastructure workflows where all changes are reviewed 
 
 ---
 
-# Proof of Deployment
+## Proof of Deployment
 
 The following screenshots demonstrate the complete end-to-end request flow.
 
 ---
 
-## 1️⃣ HTTP Request (Simulated Webhook via Postman)
+### 1️⃣ HTTP Request (Simulated Webhook via Postman)
 
 ![Postman Request](docs/architecture/proof-01-postman-request.png)
 
@@ -205,7 +205,7 @@ The following screenshots demonstrate the complete end-to-end request flow.
 
 ---
 
-## 2️⃣ Lambda Processing (CloudWatch Logs)
+### 2️⃣ Lambda Processing (CloudWatch Logs)
 
 ![CloudWatch Log](docs/architecture/proof-02-cloudwatch-log.png)
 
@@ -218,7 +218,7 @@ Structured log confirms:
 
 ---
 
-## 3️⃣ Event Persisted (DynamoDB)
+### 3️⃣ Event Persisted (DynamoDB)
 
 ![DynamoDB Item](docs/architecture/proof-03-dynamodb-item.png)
 
@@ -234,7 +234,7 @@ This confirms full request → processing → persistence pipeline integrity.
 
 ---
 
-# Operational Considerations
+## Operational Considerations
 
 Basic operational visibility is provided via CloudWatch logs.
 
@@ -255,7 +255,7 @@ These are intentionally excluded to keep the system minimal and focused.
 
 ---
 
-# Intentional Scope Limitations
+## Intentional Scope Limitations
 
 Not included:
 
@@ -269,7 +269,7 @@ This project is designed as a **foundational ingestion layer**, not a full produ
 
 ---
 
-# Engineering Commentary
+## Engineering Commentary
 
 This project intentionally demonstrates:
 
@@ -286,7 +286,7 @@ that can serve as a foundation for production systems.
 
 ---
 
-# Current State
+## Current State
 
 - Fully deployed to AWS
 - Public HTTP API endpoint active
