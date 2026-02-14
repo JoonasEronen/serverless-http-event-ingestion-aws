@@ -1,224 +1,303 @@
 # Serverless HTTP Event Ingestion (AWS)
 
 > **Project status**  
-> This project is fully functional and deployed to AWS.
-> It represents a realistic, working serverless ingestion backend.
->
-> Documentation reflects a realistic cloud engineering workflow and
-> explicitly highlights production-level considerations that are
-> intentionally out of scope for this version.
+> Fully functional, deployed to AWS, and automated via CI/CD.  
+> Demonstrates a production-style infrastructure workflow using Terraform and GitHub Actions.
+
+---
 
 ## Goal
+
 Receive → validate → enrich → store HTTP events in a cost-efficient, serverless way.
 
 This project demonstrates a realistic cloud backend pattern commonly used for:
+
 - Third-party webhooks
 - IoT / telemetry ingestion
 - Application analytics events
 - Audit and logging pipelines
 
-The focus is on **clean architecture, cost awareness, and extensibility**, not on building a full product.
+The focus is on **clean architecture, cost awareness, automation, and extensibility**, not on building a full product.
 
 ---
 
-## Architecture Overview
+# Architecture Overview
 
 ![Architecture](docs/architecture/architecture-event-ingestion.png)
 
 [View SVG version](docs/architecture/architecture-event-ingestion.svg)
 
-
 ### Flow
-1. External system sends an HTTP `POST /events` request
-   *(In this project, the external webhook source is simulated using Postman for testing purposes.)*
+
+1. External system sends an HTTP `POST /events` request  
+   *(In this project, the external webhook source is simulated using Postman.)*
 2. Amazon API Gateway (HTTP API) receives the request
 3. AWS Lambda:
    - validates the payload
-   - enriches it with metadata (timestamp, event_id)
+   - enriches it with metadata (`event_id`, timestamp)
 4. Amazon DynamoDB stores the raw event and metadata
-5. Amazon CloudWatch collects logs, metrics, and errors
+5. Amazon CloudWatch collects structured logs and execution data
 
-Later processing (analytics, replay, pipelines) is intentionally **out of scope** for this project.
+Later processing (analytics, replay, pipelines) is intentionally **out of scope**.
 
 ---
 
-## Problem Statement
-Build a simple, scalable backend that can receive HTTP events, perform lightweight validation, and persist them for later processing **without managing any continuously active servers**.
+# Problem Statement
+
+Build a simple, scalable backend that can receive HTTP events, perform lightweight validation, and persist them for later processing **without managing continuously running servers**.
 
 This mirrors real-world ingestion systems where:
-- traffic is bursty
-- cost must scale with usage
-- infrastructure should stay minimal
+
+- Traffic is bursty
+- Cost must scale with usage
+- Infrastructure should stay minimal
+- Observability is required for debugging
 
 ---
 
-## First Principles Breakdown
+# First Principles Breakdown
 
 ### What is the simplest system that solves the problem?
 
 1. **Public entry point**  
-   A single HTTP endpoint that external systems can call.
+   A single HTTP endpoint external systems can call.
 
 2. **Event-driven compute**  
-   Logic that runs only when an event arrives.
+   Logic that runs only when events arrive.
 
 3. **Durable storage**  
-   Events must be stored reliably for later consumption.
+   Events must be reliably stored for replay and later consumption.
 
 4. **Observability**  
-   Logs and metrics are required to verify correct behavior and debug issues.
+   Logs and traceability are required to verify correct behavior.
 
 ---
 
-## Business Context
+# Business Context
 
 Many systems need a reliable way to receive events from external sources
-(webhooks, devices, services) without tightly coupling those sources to internal systems.
+(webhooks, devices, services) without tightly coupling those producers to internal systems.
 
-Common challenges include:
+Common challenges:
+
 - Bursty and unpredictable traffic
 - Cost inefficiency of always-on servers
 - Tight coupling between producers and consumers
 - Difficulty replaying or reprocessing events
 
-This project models a simple, decoupled ingestion layer that solves these problems
-while keeping operational and cost complexity low.
+This project models a minimal, decoupled ingestion layer that solves these problems
+while keeping operational complexity low.
 
 ---
 
-## Cost and Scaling Model
-
-This system is designed to scale with usage and remain inexpensive at low traffic volumes.
+# Cost and Scaling Model
 
 - No continuously running servers
-- Compute is billed only when events are processed
-- Storage cost scales linearly with the number of events
+- Compute billed only when events are processed
+- Storage cost scales linearly with number of events
+- Automatically scales with traffic
 
-Typical usage scenarios:
+Suitable for:
+
 - Low baseline traffic with occasional bursts
-- Event-driven integrations rather than constant polling
-
-This makes the solution suitable for early-stage systems,
-internal tooling, and ingestion pipelines where cost predictability matters.
+- Event-driven integrations
+- Early-stage systems or internal tooling
 
 ---
 
-## Design Decisions & Trade-offs
+# Design Decisions & Trade-offs
 
 ### API Gateway HTTP API (not REST API)
 - Lower cost
 - Lower latency
-- Sufficient feature set for ingestion-only use case
+- Sufficient feature set for ingestion use case
 
-### AWS Lambda for validation
+### AWS Lambda
 - No idle compute cost
-- Scales automatically with traffic
-- Keeps API Gateway configuration simple
+- Automatic scaling
+- Keeps API layer lightweight
 
-### DynamoDB for event storage
-- Optimized for high write throughput
+### DynamoDB
+- High write throughput
 - No schema migrations
-- Easy to attach future consumers (streams, analytics, replay)
-
-## Intentional Scope Limitations
-The following features are intentionally excluded to keep the system focused
-on ingestion reliability and cost-efficiency rather than full product concerns:
-
-- Authentication and user management
-- Frontend/UI
-- Complex schemas and validation rules
-- Real-time processing pipelines
-- Analytics dashboards
-- Production SLAs and compliance requirements
-
-This project is designed as a **foundation**, not a finished product.
+- Easy to extend with streams or replay patterns
 
 ---
 
-## Infrastructure as Code
+# Infrastructure as Code
 
-All infrastructure for this project is defined and deployed using **Terraform**.
+All infrastructure is defined using **Terraform**.
 
-Key principles:
-- Reproducible deployments
-- Clear separation of concerns
-- Least-privilege IAM permissions
-- Explicit tagging for cost visibility
+Provisioned resources:
 
-The current Terraform configuration provisions the full system:
 - API Gateway (HTTP API)
 - Lambda function and execution role
 - DynamoDB table
-- Required IAM policies and permissions
+- IAM policies and permissions
+- Logging configuration
 
-The infrastructure reflects a completed, working baseline that can be
-extended further as requirements evolve.
+Principles:
 
-All resources are deployed to an AWS account using `terraform apply`,
-and the system is actively handling test traffic via the public HTTP endpoint.
-
----
-
-## Current State
-
-- Fully deployed to AWS using Terraform
-- Public HTTP API receiving events
-- Lambda-based validation and enrichment
-- Events persisted in DynamoDB
-- Logs and metrics available in CloudWatch
-
-The system is intentionally minimal to emphasize correctness,
-cost-awareness, and clear service boundaries.
+- Reproducible deployments
+- Least-privilege IAM
+- Explicit tagging
+- Fully automated CI/CD workflow
 
 ---
 
-## Operational Considerations
+# CI/CD & Infrastructure Automation
 
-Basic operational visibility is provided via CloudWatch logs and metrics.
+This project is deployed using GitHub Actions with automated Terraform execution.
 
-- Request flow can be traced using request_id and event_id
-- Lambda logs provide validation and processing visibility
-- DynamoDB acts as a durable source of truth for received events
+## Workflow Overview
 
-In a production environment, this system would typically be extended with:
-- Alarms for error rates and throttling
-- Access controls and rate limiting
-- Structured error classification
+### Pull Request
 
-These are intentionally excluded from the current version to keep the system minimal.
+Opening a PR triggers:
+
+- `terraform init`
+- `terraform validate`
+- `terraform plan`
+
+Infrastructure changes are validated before merge.
+
+![CI Pull Request](docs/architecture/ci-01-open-pull-request.png)
 
 ---
 
-## Next Iteration (Production Considerations)
+### Merge to main
 
-The following items are intentionally excluded from the current version,
-but represent typical production concerns for an ingestion system:
+Merging to `main` triggers:
 
-- Authentication and authorization
-- Request rate limiting and abuse protection
-- Enhanced schema validation and error classification
-- Alerting for error rates and throttling
+- `terraform apply`
+- Automatic deployment to AWS
+- OIDC authentication (no static AWS keys)
+
+![Terraform Apply Success](docs/architecture/ci-02-terraform-apply-success.png)
+
+---
+
+## Security Model
+
+- No long-lived AWS credentials stored in GitHub
+- GitHub → AWS authentication via OIDC
+- Dedicated least-privilege IAM role for Terraform
+- Fully automated and auditable infrastructure changes
+
+This mirrors real-world infrastructure workflows where all changes are reviewed and deployed automatically.
+
+---
+
+# Proof of Deployment
+
+The following screenshots demonstrate the complete end-to-end request flow.
+
+---
+
+## 1️⃣ HTTP Request (Simulated Webhook via Postman)
+
+![Postman Request](docs/architecture/proof-01-postman-request.png)
+
+- `POST /events`
+- JSON payload
+- 200 OK response
+- Returns `event_id` and `request_id`
+
+---
+
+## 2️⃣ Lambda Processing (CloudWatch Logs)
+
+![CloudWatch Log](docs/architecture/proof-02-cloudwatch-log.png)
+
+Structured log confirms:
+
+- Event received
+- `event_id` matches API response
+- `request_id` matches API response
+- Successful ingestion
+
+---
+
+## 3️⃣ Event Persisted (DynamoDB)
+
+![DynamoDB Item](docs/architecture/proof-03-dynamodb-item.png)
+
+Stored item includes:
+
+- event_id
+- request_id
+- payload
+- received_at timestamp
+- event type
+
+This confirms full request → processing → persistence pipeline integrity.
+
+---
+
+# Operational Considerations
+
+Basic operational visibility is provided via CloudWatch logs.
+
+Traceability:
+
+- request_id links API → Lambda → DynamoDB
+- event_id uniquely identifies stored event
+- Structured JSON logs for observability
+
+In production, the system would typically add:
+
+- Error rate alarms
+- Throttling alarms
+- Authentication and rate limiting
 - Environment separation (dev / prod)
 
-They are omitted here to keep the project focused on ingestion reliability,
-cost efficiency, and architectural clarity rather than full product hardening.
+These are intentionally excluded to keep the system minimal and focused.
 
 ---
 
-## CI/CD and Infrastructure Maturity (Planned)
+# Intentional Scope Limitations
 
-The current version of this project is deployed using Terraform from a local environment.
-CI/CD is not yet implemented in this version.
+Not included:
 
-The next iteration will introduce a fully automated CI/CD workflow with:
-- GitHub Actions for automated validation and deployment
-- Terraform remote state (S3 backend)
-- State locking (DynamoDB)
-- GitHub → AWS authentication using OIDC (no long-lived credentials)
-- Branch protection and PR-based infrastructure validation
+- Authentication and user management
+- Frontend/UI
+- Complex schema validation
+- Real-time analytics pipelines
+- Production SLAs and compliance hardening
 
-The goal of this iteration is to evolve the project from a manually deployed MVP
-into a production-style, automation-driven infrastructure workflow.
+This project is designed as a **foundational ingestion layer**, not a full product.
 
-This reflects real-world engineering practices where infrastructure changes
-are validated, reviewed, and deployed automatically.
+---
+
+# Engineering Commentary
+
+This project intentionally demonstrates:
+
+- Infrastructure as Code using Terraform
+- PR-based infrastructure validation
+- Automated CI/CD deployment workflow
+- Secure GitHub → AWS OIDC authentication
+- Serverless cost-aware architecture
+- Structured logging and traceability
+- Clear trade-off decisions
+
+While minimal in scope, the architecture models a realistic ingestion backend
+that can serve as a foundation for production systems.
+
+---
+
+# Current State
+
+- Fully deployed to AWS
+- Public HTTP API endpoint active
+- CI/CD automated via GitHub Actions
+- Secure OIDC-based authentication
+- End-to-end request flow verified
+- All infrastructure defined as code
+
+---
+
+## Status
+
+This project represents a completed baseline of a production-style,
+serverless ingestion backend with automated infrastructure delivery.
