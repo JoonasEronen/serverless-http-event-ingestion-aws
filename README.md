@@ -1,8 +1,9 @@
 # Serverless HTTP Event Ingestion (AWS)
 
 > **Project status**  
-> Fully functional, deployed to AWS, and automated via CI/CD.  
-> Demonstrates a production-style infrastructure workflow using Terraform and GitHub Actions.
+> Fully functional, validated in AWS, with CI/CD validation and approval-gated deployment. 
+> Infrastructure is reproducible and deployable on demand.  
+> Demonstrates a production-style infrastructure workflow using Terraform and GitHub Actions.  
 
 ---
 
@@ -141,7 +142,7 @@ Principles:
 - Reproducible deployments
 - Least-privilege IAM
 - Explicit tagging
-- Fully automated CI/CD workflow
+- CI/CD workflow with automated validation and approval-gated apply
 
 ---
 
@@ -170,7 +171,7 @@ Infrastructure changes are validated before merge.
 Merging to `main` triggers:
 
 - `terraform apply`
-- Automatic deployment to AWS
+- Deployment to AWS via approval-gated Terraform apply
 - OIDC authentication (no static AWS keys)
 
 ![Terraform Apply Success](docs/architecture/ci-02-terraform-apply-success.png)
@@ -182,7 +183,7 @@ Merging to `main` triggers:
 - No long-lived AWS credentials stored in GitHub
 - GitHub → AWS authentication via OIDC
 - Dedicated least-privilege IAM role for Terraform
-- Fully automated and auditable infrastructure changes
+- Auditable and controlled infrastructure changes via CI/CD
 
 This mirrors real-world infrastructure workflows where all changes are reviewed and deployed automatically.
 
@@ -275,7 +276,7 @@ This project intentionally demonstrates:
 
 - Infrastructure as Code using Terraform
 - PR-based infrastructure validation
-- Automated CI/CD deployment workflow
+- CI/CD workflow with automated validation and controlled deployment
 - Secure GitHub → AWS OIDC authentication
 - Serverless cost-aware architecture
 - Structured logging and traceability
@@ -288,8 +289,8 @@ that can serve as a foundation for production systems.
 
 ## Current State
 
-- Fully deployed to AWS
-- Public HTTP API endpoint active
+- Validated in AWS and deployable via CI/CD
+- Public HTTP API endpoint validated in AWS
 - CI/CD automated via GitHub Actions
 - Secure OIDC-based authentication
 - End-to-end request flow verified
@@ -299,5 +300,4 @@ that can serve as a foundation for production systems.
 
 ## Status
 
-This project represents a completed baseline of a production-style,
-serverless ingestion backend with automated infrastructure delivery.
+This project represents a completed baseline of a production-style, serverless ingestion backend with automated infrastructure delivery.
