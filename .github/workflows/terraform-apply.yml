@@ -34,7 +34,7 @@ jobs:
       - name: Configure AWS (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::246089461629:role/github-terraform-apply
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-terraform-apply
           aws-region: eu-north-1
 
       - name: Terraform fmt
