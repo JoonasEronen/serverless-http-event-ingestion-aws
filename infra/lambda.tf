@@ -17,7 +17,6 @@ resource "aws_lambda_function" "ingestion" {
     }
   }
 
-  tags = local.tags
 }
 
 output "lambda_function_name" {
