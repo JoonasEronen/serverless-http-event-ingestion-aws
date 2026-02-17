@@ -26,6 +26,12 @@ jobs:
           aws-region: eu-north-1
           audience: sts.amazonaws.com
 
+      - name: Build lambda.zip
+        run: |
+          mkdir -p infra/build
+          cd app
+          zip -r ../infra/build/lambda.zip .
+
       - name: Terraform init
         working-directory: infra
         run: terraform init -input=false -reconfigure
