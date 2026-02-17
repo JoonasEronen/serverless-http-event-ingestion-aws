@@ -1,0 +1,38 @@
+name: terraform-destroy
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  destroy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.14.5
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-terraform-apply
+          aws-region: eu-north-1
+
+      - name: Terraform init
+        working-directory: infra
+        run: terraform init -input=false -reconfigure
+
+      - name: Terraform plan destroy
+        working-directory: infra
+        run: terraform plan -destroy -input=false
+
+      - name: Terraform destroy
+        working-directory: infra
+        run: terraform destroy -auto-approve -input=false
