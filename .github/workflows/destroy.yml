@@ -26,11 +26,30 @@ jobs:
           aws-region: eu-north-1
           audience: sts.amazonaws.com
 
+      # Build lambda.zip because Terraform evaluates filebase64sha256() even during destroy plan
       - name: Build lambda.zip
         run: |
+          set -euo pipefail
           mkdir -p infra/build
-          cd app
-          zip -r ../infra/build/lambda.zip .
+          (cd app && zip -r ../infra/build/lambda.zip .)
+          echo "Built zip:"
+          ls -lah infra/build/lambda.zip
+
+      # One-run debug: proves paths + zip location (leave it in until destroy succeeds once)
+      - name: Debug paths
+        run: |
+          set -euo pipefail
+          echo "PWD=$(pwd)"
+          echo "Repo root:"
+          ls -lah
+          echo "---- app ----"
+          ls -lah app
+          echo "---- infra ----"
+          ls -lah infra
+          echo "---- infra/build ----"
+          ls -lah infra/build
+          echo "---- find lambda.zip ----"
+          find . -maxdepth 5 -name "lambda.zip" -print
 
       - name: Terraform init
         working-directory: infra
