@@ -1,7 +1,6 @@
 resource "aws_apigatewayv2_api" "http_api" {
   name          = "${local.name_prefix}-http-api"
   protocol_type = "HTTP"
-  tags          = local.tags
 }
 
 resource "aws_apigatewayv2_integration" "lambda" {
@@ -21,7 +20,6 @@ resource "aws_apigatewayv2_stage" "default" {
   api_id      = aws_apigatewayv2_api.http_api.id
   name        = "$default"
   auto_deploy = true
-  tags        = local.tags
 }
 
 resource "aws_lambda_permission" "allow_apigw" {
