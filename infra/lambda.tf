@@ -5,8 +5,8 @@ resource "aws_lambda_function" "ingestion" {
   runtime = "python3.12"
   handler = "lambda_handler.lambda_handler"
 
-  filename         = "${path.module}/../build/lambda.zip"
-  source_code_hash = filebase64sha256("${path.module}/../build/lambda.zip")
+  filename         = "${path.root}/build/lambda.zip"
+  source_code_hash = filebase64sha256("${path.root}/build/lambda.zip")
 
   timeout     = 10
   memory_size = 128

@@ -5,6 +5,7 @@ on:
     branches: ["main"]
     paths:
       - "infra/**"
+      - ".github/workflows/**"
   workflow_dispatch: {}
 
 permissions:
@@ -41,17 +42,19 @@ jobs:
         run: terraform fmt -check -recursive
 
       - name: Build Lambda package (lambda.zip)
-        working-directory: .
         run: |
           mkdir -p build
           cd app
           zip -r ../build/lambda.zip .
 
       - name: Terraform init
-        run: terraform init -input=false
+        run: terraform init -input=false -reconfigure
 
       - name: Terraform validate
         run: terraform validate
 
+      - name: Terraform plan
+        run: terraform plan -input=false -out=tfplan
+
       - name: Terraform apply
-        run: terraform apply -auto-approve -input=false
+        run: terraform apply -auto-approve -input=false tfplan

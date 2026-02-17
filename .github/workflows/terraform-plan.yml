@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "infra/**"
+      - ".github/workflows/**"
 
 permissions:
   contents: read
@@ -41,14 +42,13 @@ jobs:
         run: terraform fmt -check -recursive
 
       - name: Build Lambda package (lambda.zip)
-        working-directory: .
         run: |
           mkdir -p build
           cd app
           zip -r ../build/lambda.zip .
 
       - name: Terraform init
-        run: terraform init -input=false
+        run: terraform init -input=false -reconfigure
 
       - name: Terraform validate
         run: terraform validate
