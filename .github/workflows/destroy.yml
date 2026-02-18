@@ -31,24 +31,20 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p infra/build
-          (cd app && zip -r ../infra/build/lambda.zip .)
-          echo "Built zip:"
+          (cd infra/app && zip -r ../build/lambda.zip .)
           ls -lah infra/build/lambda.zip
+
 
       # One-run debug: proves paths + zip location (leave it in until destroy succeeds once)
       - name: Debug paths
         run: |
           set -euo pipefail
           echo "PWD=$(pwd)"
-          echo "Repo root:"
           ls -lah
-          echo "---- app ----"
-          ls -lah app
-          echo "---- infra ----"
-          ls -lah infra
+          echo "---- infra/app ----"
+          ls -lah infra/app
           echo "---- infra/build ----"
           ls -lah infra/build
-          echo "---- find lambda.zip ----"
           find . -maxdepth 5 -name "lambda.zip" -print
 
       - name: Terraform init
