@@ -1,9 +1,10 @@
 # Serverless HTTP Event Ingestion (AWS)
 
 > **Project status**  
-> Fully functional, validated in AWS, with CI/CD validation and approval-gated deployment. 
+> Validated in AWS, with CI/CD validation and approval-gated deployment.  
 > Infrastructure is reproducible and deployable on demand.  
 > Demonstrates a production-style infrastructure workflow using Terraform and GitHub Actions.  
+> Demonstrated multiple clean deploy cycles.
 
 ---
 
@@ -148,44 +149,80 @@ Principles:
 
 ## CI/CD & Infrastructure Automation
 
-This project is deployed using GitHub Actions with automated Terraform execution.
+This project is deployed exclusively via GitHub Actions using automated Terraform workflows.
 
-### Workflow Overview
+The pipeline demonstrates a full infrastructure lifecycle:
 
-#### Pull Request
+- Clean deployment from empty state
+- Controlled configuration changes via Pull Request
+- Automated validation before merge
+- OIDC-based authentication (no static AWS keys)
+- Deterministic infrastructure state
 
-Opening a PR triggers:
+---
+
+### 1️⃣ Clean Deploy via CI (Infrastructure Rebuild)
+
+After destroying the infrastructure, a fresh deployment was triggered via CI.
+
+The deployment required environment approval before `terraform apply` was executed.
+
+This run shows a full infrastructure creation:
+
+- `11 added, 0 changed, 0 destroyed`
+- Apply gated by manual approval
+- All resources provisioned via Terraform
+- No manual AWS Console interaction
+
+![CI Redeploy](docs/architecture/ci-01-redeploy-terraform-apply-success.png)
+
+This confirms the infrastructure is fully reproducible from code and deployed through a controlled release process.
+
+---
+
+### 2️⃣ Pull Request – Infrastructure Change Validation
+
+A configuration change (Lambda memory update) was introduced via a feature branch.
+
+Opening a Pull Request triggered:
 
 - `terraform init`
 - `terraform validate`
 - `terraform plan`
 
-Infrastructure changes are validated before merge.
+The plan clearly shows the intended in-place update:
 
-![CI Pull Request](docs/architecture/ci-01-open-pull-request.png)
+- `memory_size 256 → 128`
+
+![CI Pull Request](docs/architecture/ci-02-open-pull-request.png)
+
+No infrastructure changes are applied before review and merge.
 
 ---
 
-#### Merge to main
+### 3️⃣ Merge to main – Controlled Apply
 
-Merging to `main` triggers:
+After approval and merge, the pipeline executed:
 
 - `terraform apply`
-- Deployment to AWS via approval-gated Terraform apply
-- OIDC authentication (no static AWS keys)
+- In-place update (`0 added, 1 changed, 0 destroyed`)
+- OIDC authentication (no static credentials)
 
-![Terraform Apply Success](docs/architecture/ci-02-terraform-apply-success.png)
+![CI Apply](docs/architecture/ci-03-terraform-apply-success.png)
+
+This demonstrates safe, review-driven infrastructure modification.
 
 ---
 
-## Security Model
+### Security Characteristics
 
 - No long-lived AWS credentials stored in GitHub
 - GitHub → AWS authentication via OIDC
-- Dedicated least-privilege IAM role for Terraform
-- Auditable and controlled infrastructure changes via CI/CD
+- Least-privilege IAM roles for plan and apply
+- All changes auditable via PR history
+- Infrastructure rebuildable on demand
 
-This mirrors real-world infrastructure workflows where all changes are reviewed and deployed automatically.
+This models a production-style infrastructure delivery workflow.
 
 ---
 
